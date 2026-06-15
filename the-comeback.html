@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE COMEBACK — Daily Goal Tracker</title>
+<meta name="description" content="THE COMEBACK — A cinematic daily goal tracker and weekly progress calculator. Track your tasks, energy, and wins.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0f;
+  --bg-card: #111118;
+  --bg-card-hover: #16161f;
+  --gold: #f5c518;
+  --gold-dim: rgba(245, 197, 24, 0.15);
+  --gold-glow: rgba(245, 197, 24, 0.4);
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --text-muted: #55556a;
+  --danger: #ff4060;
+  --success: #2ecc71;
+  --border: #1e1e2a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle background texture */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(245, 197, 24, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(10, 10, 30, 0.8) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════ */
+h1, h2, h3, h4 {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT CONTAINER
+   ═══════════════════════════════════════════ */
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════ */
+.hero {
+  padding: 80px 0 50px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.hero-day {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(56px, 12vw, 110px);
+  line-height: 0.95;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.hero-day span {
+  color: var(--gold);
+  text-shadow: 0 0 40px var(--gold-glow);
+}
+
+.hero-date {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-line {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  margin: 28px auto 0;
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════
+   CARD STYLES
+   ═══════════════════════════════════════════ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 36px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  transition: border-color 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(245, 197, 24, 0.15);
+}
+
+/* Gold war-medal ribbon */
+.card-ribbon {
+  position: relative;
+}
+.card-ribbon::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--gold), rgba(245, 197, 24, 0.2));
+}
+
+.card-title {
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+   ═══════════════════════════════════════════ */
+label.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim);
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-group {
+  margin-bottom: 24px;
+}
+
+/* ═══════════════════════════════════════════
+   TASK CHECKBOXES
+   ═══════════════════════════════════════════ */
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.task-row input[type="text"] {
+  flex: 1;
+}
+
+/* Custom checkbox */
+.task-check {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.task-check input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.task-check .checkmark {
+  position: absolute;
+  top: 0; left: 0;
+  width: 22px; height: 22px;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  transition: all 0.25s ease;
+}
+
+.task-check input:checked ~ .checkmark {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.task-check .checkmark::after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 6px; top: 2px;
+  width: 5px; height: 10px;
+  border: solid var(--bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.task-check input:checked ~ .checkmark::after {
+  display: block;
+}
+
+/* Gold strikethrough animation */
+.task-row.checked .task-text-input {
+  text-decoration: line-through;
+  text-decoration-color: var(--gold);
+  color: var(--text-muted);
+}
+
+.task-row.flash .checkmark {
+  box-shadow: 0 0 20px var(--gold-glow), 0 0 40px rgba(245, 197, 24, 0.2);
+}
+
+/* ═══════════════════════════════════════════
+   ENERGY SLIDER
+   ═══════════════════════════════════════════ */
+.energy-control {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.energy-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border);
+  outline: none;
+  border-radius: 0;
+}
+
+.energy-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--gold);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 12px var(--gold-glow);
+  transition: transform 0.2s ease;
+}
+
+.energy-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.energy-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--gold);
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+}
+
+.energy-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--gold);
+  min-width: 50px;
+  text-align: center;
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════ */
+.btn {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.15em;
+  padding: 16px 40px;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 0 30px var(--gold-glow), 0 4px 20px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+
+.btn-outline:hover {
+  background: var(--gold-dim);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  padding: 10px 20px;
+}
+
+.btn-ghost:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════
+   MINI SUMMARY — THIS WEEK AT A GLANCE
+   ═══════════════════════════════════════════ */
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.stat-box {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.stat-box:hover {
+  border-color: rgba(245, 197, 24, 0.2);
+}
+
+.stat-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 38px;
+  color: var(--gold);
+  line-height: 1;
+  text-shadow: 0 0 15px var(--gold-glow);
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR (cinematic)
+   ═══════════════════════════════════════════ */
+.progress-container {
+  margin: 28px 0 12px;
+}
+
+.progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.progress-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.progress-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--gold);
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), #ffd952);
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Full-width cinematic progress bar */
+.progress-cinematic {
+  margin: 32px -32px;
+}
+
+.progress-cinematic .progress-track {
+  height: 8px;
+}
+
+.progress-cinematic .progress-fill {
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+
+/* ═══════════════════════════════════════════
+   WEEKLY REPORT PANEL
+   ═══════════════════════════════════════════ */
+.report-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.report-panel.open {
+  max-height: 3000px;
+}
+
+.comeback-score-display {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.comeback-score-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.comeback-score-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(80px, 15vw, 140px);
+  color: var(--gold);
+  line-height: 1;
+  text-shadow: 0 0 60px var(--gold-glow), 0 0 120px rgba(245, 197, 24, 0.15);
+}
+
+.youre-back {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(42px, 9vw, 72px);
+  color: var(--gold);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 2s ease;
+  text-shadow: 0 0 80px var(--gold-glow), 0 0 160px rgba(245, 197, 24, 0.2);
+  margin-top: 16px;
+  letter-spacing: 0.1em;
+}
+
+.youre-back.visible {
+  opacity: 1;
+}
+
+.wins-list {
+  list-style: none;
+  padding: 0;
+}
+
+.wins-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.wins-list li::before {
+  content: '★';
+  color: var(--gold);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.wins-list li:last-child {
+  border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════
+   PAST WEEKS ARCHIVE
+   ═══════════════════════════════════════════ */
+.archive-section {
+  margin-top: 48px;
+  margin-bottom: 60px;
+}
+
+.archive-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 16px 0;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  width: 100%;
+  text-align: left;
+  transition: color 0.3s ease;
+}
+
+.archive-toggle:hover {
+  color: var(--text);
+}
+
+.archive-toggle .arrow {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.archive-toggle.open .arrow {
+  transform: rotate(90deg);
+}
+
+.archive-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.archive-list.open {
+  max-height: 5000px;
+}
+
+.archive-week-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.25s ease;
+}
+
+.archive-week-item:hover {
+  border-color: rgba(245, 197, 24, 0.3);
+  background: var(--bg-card-hover);
+}
+
+.archive-week-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.05em;
+}
+
+.archive-week-score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: var(--gold);
+}
+
+/* Archive detail modal */
+.archive-detail-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.archive-detail-overlay.open {
+  display: flex;
+}
+
+.archive-detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 40px 36px;
+  position: relative;
+}
+
+.archive-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.archive-close:hover {
+  color: var(--text);
+}
+
+/* ═══════════════════════════════════════════
+   SAVED INDICATOR / TOAST
+   ═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 14px 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  z-index: 2000;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   SECTION SPACING
+   ═══════════════════════════════════════════ */
+.section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* ═══════════════════════════════════════════
+   ENTRY NAVIGATION (today/past day)
+   ═══════════════════════════════════════════ */
+.entry-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.entry-nav-date {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.entry-nav-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+.site-footer {
+  text-align: center;
+  padding: 40px 0 32px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.site-footer p {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; opacity: 0; }
+.delay-2 { animation-delay: 0.2s; opacity: 0; }
+.delay-3 { animation-delay: 0.3s; opacity: 0; }
+.delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+@keyframes goldFlash {
+  0% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50% { box-shadow: 0 0 25px 5px var(--gold-glow); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.gold-flash {
+  animation: goldFlash 0.5s ease;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding: 50px 0 36px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+
+  .mini-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .progress-cinematic {
+    margin: 24px -20px;
+  }
+
+  .btn {
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+
+  .archive-detail-card {
+    padding: 28px 20px;
+  }
+
+  .comeback-score-number {
+    font-size: 80px;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════════════════════
+     HERO
+     ═════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-label fade-in-up">Your Comeback Starts Now</div>
+    <h1 class="hero-day fade-in-up delay-1">DAY <span id="heroDay">1</span> OF YOUR COMEBACK</h1>
+    <p class="hero-date fade-in-up delay-2" id="heroDate"></p>
+    <div class="hero-line fade-in-up delay-3"></div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════
+     TODAY'S ENTRY PANEL
+     ═════════════════════════════════════════ -->
+<section class="section" id="entrySection">
+  <div class="container">
+    <div class="card card-ribbon fade-in-up delay-2">
+      <div class="entry-nav">
+        <div class="entry-nav-date" id="entryNavDate">Today</div>
+        <div class="entry-nav-btns">
+          <button class="nav-btn" id="navPrev" title="Previous Day">◀</button>
+          <button class="nav-btn" id="navToday" title="Go to Today">●</button>
+          <button class="nav-btn" id="navNext" title="Next Day">▶</button>
+        </div>
+      </div>
+
+      <div class="card-title">Daily Entry</div>
+      <div class="card-subtitle">Log your mission for the day</div>
+
+      <!-- Main Goal -->
+      <div class="field-group">
+        <label class="field-label" for="mainGoal">Main Goal</label>
+        <input type="text" id="mainGoal" placeholder="What's your #1 mission today?" autocomplete="off">
+      </div>
+
+      <!-- Tasks -->
+      <div class="field-group">
+        <label class="field-label">Tasks (up to 5)</label>
+        <div class="tasks-list" id="tasksList">
+          <div class="task-row" data-index="0">
+            <label class="task-check">
+              <input type="checkbox" data-task="0">
+              <span class="checkmark"></span>
+            </label>
+            <input type="text" class="task-text-input" data-task-text="0" placeholder="Task 1" autocomplete="off">
+          </div>
+          <div class="task-row" data-index="1">
+            <label class="task-check">
+              <input type="checkbox" data-task="1">
+              <span class="checkmark"></span>
+            </label>
+            <input type="text" class="task-text-input" data-task-text="1" placeholder="Task 2" autocomplete="off">
+          </div>
+          <div class="task-row" data-index="2">
+            <label class="task-check">
+              <input type="checkbox" data-task="2">
+              <span class="checkmark"></span>
+            </label>
+            <input type="text" class="task-text-input" data-task-text="2" placeholder="Task 3" autocomplete="off">
+          </div>
+          <div class="task-row" data-index="3">
+            <label class="task-check">
+              <input type="checkbox" data-task="3">
+              <span class="checkmark"></span>
+            </label>
+            <input type="text" class="task-text-input" data-task-text="3" placeholder="Task 4" autocomplete="off">
+          </div>
+          <div class="task-row" data-index="4">
+            <label class="task-check">
+              <input type="checkbox" data-task="4">
+              <span class="checkmark"></span>
+            </label>
+            <input type="text" class="task-text-input" data-task-text="4" placeholder="Task 5" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <!-- Energy Level -->
+      <div class="field-group">
+        <label class="field-label">Energy Level</label>
+        <div class="energy-control">
+          <input type="range" min="1" max="10" value="5" class="energy-slider" id="energySlider">
+          <div class="energy-value" id="energyValue">5</div>
+        </div>
+      </div>
+
+      <!-- Reflection -->
+      <div class="field-group">
+        <label class="field-label" for="reflection">Reflection</label>
+        <textarea id="reflection" placeholder="What did I do well? What did I miss?"></textarea>
+      </div>
+
+      <!-- Win of the Day -->
+      <div class="field-group">
+        <label class="field-label" for="winOfDay">Win of the Day</label>
+        <input type="text" id="winOfDay" placeholder="One thing I'm proud of today" autocomplete="off">
+      </div>
+
+      <button class="btn btn-gold btn-block" id="saveEntry">Save Entry</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════
+     THIS WEEK AT A GLANCE
+     ═════════════════════════════════════════ -->
+<section class="section" id="weekGlance">
+  <div class="container">
+    <div class="card fade-in-up delay-3">
+      <div class="card-title">This Week at a Glance</div>
+      <div class="card-subtitle">Live stats updating as you work</div>
+
+      <div class="mini-stats">
+        <div class="stat-box">
+          <div class="stat-number" id="statTasks">0%</div>
+          <div class="stat-label">Tasks Done</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="statEnergy">0</div>
+          <div class="stat-label">Avg Energy</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="statStreak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="statEntries">0</div>
+          <div class="stat-label">Entries</div>
+        </div>
+      </div>
+
+      <div class="progress-container progress-cinematic">
+        <div class="progress-label-row" style="padding: 0 32px;">
+          <span class="progress-label">Comeback Progress</span>
+          <span class="progress-value" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════
+     WEEKLY REPORT
+     ═════════════════════════════════════════ -->
+<section class="section" id="weeklyReport">
+  <div class="container">
+    <button class="btn btn-outline btn-block" id="toggleReport" style="margin-bottom: 16px;">
+      View Full Weekly Report
+    </button>
+
+    <div class="report-panel" id="reportPanel">
+      <div class="card card-ribbon">
+        <div class="card-title">Weekly Report</div>
+        <div class="card-subtitle" id="reportWeekRange">—</div>
+
+        <div class="comeback-score-display">
+          <div class="comeback-score-label">Comeback Score</div>
+          <div class="comeback-score-number" id="comebackScore">0</div>
+        </div>
+
+        <div class="youre-back" id="youreBack">YOU'RE BACK.</div>
+
+        <div class="progress-container progress-cinematic">
+          <div class="progress-label-row" style="padding: 0 32px;">
+            <span class="progress-label">Overall Completion</span>
+            <span class="progress-value" id="reportProgressPercent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="reportProgressFill"></div>
+          </div>
+        </div>
+
+        <div class="mini-stats" style="margin: 28px 0;">
+          <div class="stat-box">
+            <div class="stat-number" id="reportTasks">0%</div>
+            <div class="stat-label">Tasks Completed</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" id="reportEnergy">0</div>
+            <div class="stat-label">Avg Energy</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" id="reportStreak">0</div>
+            <div class="stat-label">Streak</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" id="reportDays">0/7</div>
+            <div class="stat-label">Days Logged</div>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-top: 28px;">
+          <label class="field-label">Wins of the Week</label>
+          <ul class="wins-list" id="winsList">
+            <li>No wins logged yet — get started!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════
+     PAST WEEKS ARCHIVE
+     ═════════════════════════════════════════ -->
+<section class="archive-section" id="archiveSection">
+  <div class="container">
+    <button class="archive-toggle" id="archiveToggle">
+      <span class="arrow">▶</span> Past Weeks Archive
+    </button>
+    <div class="archive-list" id="archiveList">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</section>
+
+<!-- Archive Detail Overlay -->
+<div class="archive-detail-overlay" id="archiveOverlay">
+  <div class="archive-detail-card">
+    <button class="archive-close" id="archiveClose">✕</button>
+    <div id="archiveDetailContent">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Entry Saved ✓</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container">
+    <p>The Comeback — Every day is day one</p>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   THE COMEBACK — Core Logic
+   ═══════════════════════════════════════════════════ */
+
+(function() {
+  'use strict';
+
+  // ── Helpers ──────────────────────────────────────
+  function dateKey(d) {
+    const dd = d || new Date();
+    return dd.getFullYear() + '-' +
+      String(dd.getMonth() + 1).padStart(2, '0') + '-' +
+      String(dd.getDate()).padStart(2, '0');
+  }
+
+  function parseDate(key) {
+    const parts = key.split('-');
+    return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  }
+
+  function formatDateLong(d) {
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+
+  function formatDateShort(d) {
+    return d.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric'
+    });
+  }
+
+  function getMonday(d) {
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  }
+
+  function getSunday(monday) {
+    return new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+  }
+
+  function weekKey(d) {
+    return dateKey(getMonday(d));
+  }
+
+  // ── Storage ─────────────────────────────────────
+  const STORAGE_KEY = 'THE_COMEBACK_DATA';
+
+  function loadData() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch(e) {
+      return {};
+    }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function getEntry(key) {
+    const data = loadData();
+    return data[key] || null;
+  }
+
+  function setEntry(key, entry) {
+    const data = loadData();
+    data[key] = entry;
+    saveData(data);
+  }
+
+  // ── State ───────────────────────────────────────
+  let viewingDate = new Date();
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  // ── DOM refs ────────────────────────────────────
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  // ── Hero ────────────────────────────────────────
+  function updateHero() {
+    const data = loadData();
+    const keys = Object.keys(data).sort();
+    let dayNum = 1;
+    if (keys.length > 0) {
+      const firstDate = parseDate(keys[0]);
+      const now = new Date();
+      now.setHours(0,0,0,0);
+      dayNum = Math.max(1, Math.floor((now - firstDate) / 86400000) + 1);
+    }
+    $('#heroDay').textContent = dayNum;
+    $('#heroDate').textContent = formatDateLong(new Date());
+  }
+
+  // ── Entry Form ──────────────────────────────────
+  function loadEntryForDate(d) {
+    const key = dateKey(d);
+    const entry = getEntry(key);
+    const isToday = dateKey(d) === dateKey(today);
+
+    // Update nav date display
+    if (isToday) {
+      $('#entryNavDate').textContent = 'Today';
+    } else {
+      $('#entryNavDate').textContent = formatDateLong(d);
+    }
+
+    // Reset form
+    $('#mainGoal').value = '';
+    for (let i = 0; i < 5; i++) {
+      const cb = document.querySelector(`[data-task="${i}"]`);
+      const txt = document.querySelector(`[data-task-text="${i}"]`);
+      cb.checked = false;
+      txt.value = '';
+      cb.closest('.task-row').classList.remove('checked');
+    }
+    $('#energySlider').value = 5;
+    $('#energyValue').textContent = '5';
+    $('#reflection').value = '';
+    $('#winOfDay').value = '';
+
+    // Load if exists
+    if (entry) {
+      $('#mainGoal').value = entry.goal || '';
+      if (entry.tasks) {
+        entry.tasks.forEach(function(t, i) {
+          const txt = document.querySelector(`[data-task-text="${i}"]`);
+          const cb = document.querySelector(`[data-task="${i}"]`);
+          txt.value = t.text || '';
+          cb.checked = !!t.done;
+          if (t.done) cb.closest('.task-row').classList.add('checked');
+        });
+      }
+      $('#energySlider').value = entry.energy || 5;
+      $('#energyValue').textContent = entry.energy || 5;
+      $('#reflection').value = entry.reflection || '';
+      $('#winOfDay').value = entry.win || '';
+    }
+  }
+
+  function collectEntry() {
+    const tasks = [];
+    for (let i = 0; i < 5; i++) {
+      const txt = document.querySelector(`[data-task-text="${i}"]`).value.trim();
+      const done = document.querySelector(`[data-task="${i}"]`).checked;
+      if (txt) {
+        tasks.push({ text: txt, done: done });
+      }
+    }
+    return {
+      goal: $('#mainGoal').value.trim(),
+      tasks: tasks,
+      energy: parseInt($('#energySlider').value),
+      reflection: $('#reflection').value.trim(),
+      win: $('#winOfDay').value.trim(),
+      timestamp: Date.now()
+    };
+  }
+
+  // ── Task checkbox micro-interaction ─────────────
+  $$('[data-task]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      const row = this.closest('.task-row');
+      if (this.checked) {
+        row.classList.add('checked', 'flash');
+        setTimeout(() => row.classList.remove('flash'), 500);
+      } else {
+        row.classList.remove('checked');
+      }
+      autoSaveAndRefresh();
+    });
+  });
+
+  // ── Auto-save on any input change ───────────────
+  function autoSaveAndRefresh() {
+    const key = dateKey(viewingDate);
+    const entry = collectEntry();
+    // Only auto-save if there's at least some data
+    if (entry.goal || entry.tasks.length > 0 || entry.reflection || entry.win) {
+      setEntry(key, entry);
+      updateWeekGlance();
+    }
+  }
+
+  // Debounced auto-save
+  let saveTimer;
+  function debouncedSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(autoSaveAndRefresh, 600);
+  }
+
+  $('#mainGoal').addEventListener('input', debouncedSave);
+  $$('.task-text-input').forEach(el => el.addEventListener('input', debouncedSave));
+  $('#reflection').addEventListener('input', debouncedSave);
+  $('#winOfDay').addEventListener('input', debouncedSave);
+
+  // Energy slider
+  $('#energySlider').addEventListener('input', function() {
+    $('#energyValue').textContent = this.value;
+    debouncedSave();
+  });
+
+  // Save button
+  $('#saveEntry').addEventListener('click', function() {
+    const key = dateKey(viewingDate);
+    const entry = collectEntry();
+    setEntry(key, entry);
+    showToast('Entry Saved ✓');
+    updateWeekGlance();
+    updateHero();
+    updateArchive();
+  });
+
+  // ── Day Navigation ──────────────────────────────
+  $('#navPrev').addEventListener('click', function() {
+    viewingDate = new Date(viewingDate.getTime() - 86400000);
+    loadEntryForDate(viewingDate);
+  });
+
+  $('#navNext').addEventListener('click', function() {
+    const next = new Date(viewingDate.getTime() + 86400000);
+    if (next <= today) {
+      viewingDate = next;
+      loadEntryForDate(viewingDate);
+    }
+  });
+
+  $('#navToday').addEventListener('click', function() {
+    viewingDate = new Date(today);
+    loadEntryForDate(viewingDate);
+  });
+
+  // ── Week Glance (live stats) ────────────────────
+  function getWeekEntries(refDate) {
+    const data = loadData();
+    const monday = getMonday(refDate || new Date());
+    const entries = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+      const key = dateKey(d);
+      if (data[key]) {
+        entries.push({ date: key, ...data[key] });
+      }
+    }
+    return entries;
+  }
+
+  function calcWeekStats(entries) {
+    if (entries.length === 0) {
+      return {
+        taskPercent: 0,
+        avgEnergy: 0,
+        streak: 0,
+        entryCount: 0,
+        wins: [],
+        comebackScore: 0
+      };
+    }
+
+    let totalTasks = 0;
+    let doneTasks = 0;
+    let totalEnergy = 0;
+    const wins = [];
+
+    entries.forEach(function(e) {
+      if (e.tasks) {
+        totalTasks += e.tasks.length;
+        e.tasks.forEach(t => { if (t.done) doneTasks++; });
+      }
+      totalEnergy += (e.energy || 0);
+      if (e.win) wins.push({ date: e.date, text: e.win });
+    });
+
+    const taskPercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    const avgEnergy = entries.length > 0 ? (totalEnergy / entries.length) : 0;
+
+    // Streak: consecutive days with entries (counting backward from today)
+    const streak = calcStreak();
+
+    // Comeback Score = task% × (energy avg / 10) × streak bonus
+    // Streak bonus: 1 + (streak * 0.05), capped at 1.5
+    const streakBonus = Math.min(1 + (streak * 0.05), 1.5);
+    const comebackScore = Math.round(taskPercent * (avgEnergy / 10) * streakBonus);
+
+    return {
+      taskPercent,
+      avgEnergy: Math.round(avgEnergy * 10) / 10,
+      streak,
+      entryCount: entries.length,
+      wins,
+      comebackScore: Math.min(comebackScore, 100)
+    };
+  }
+
+  function calcStreak() {
+    const data = loadData();
+    let streak = 0;
+    const d = new Date(today);
+    while (true) {
+      const key = dateKey(d);
+      if (data[key]) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function updateWeekGlance() {
+    const entries = getWeekEntries();
+    const stats = calcWeekStats(entries);
+
+    $('#statTasks').textContent = stats.taskPercent + '%';
+    $('#statEnergy').textContent = stats.avgEnergy;
+    $('#statStreak').textContent = stats.streak;
+    $('#statEntries').textContent = stats.entryCount;
+    $('#progressPercent').textContent = stats.taskPercent + '%';
+
+    // Animate progress bar
+    setTimeout(() => {
+      $('#progressFill').style.width = stats.taskPercent + '%';
+    }, 100);
+  }
+
+  // ── Weekly Report ───────────────────────────────
+  $('#toggleReport').addEventListener('click', function() {
+    const panel = $('#reportPanel');
+    const isOpen = panel.classList.contains('open');
+
+    if (isOpen) {
+      panel.classList.remove('open');
+      this.textContent = 'View Full Weekly Report';
+    } else {
+      panel.classList.add('open');
+      this.textContent = 'Close Weekly Report';
+      generateReport();
+    }
+  });
+
+  function generateReport(refDate) {
+    const ref = refDate || new Date();
+    const monday = getMonday(ref);
+    const sunday = getSunday(monday);
+    const entries = getWeekEntries(ref);
+    const stats = calcWeekStats(entries);
+
+    $('#reportWeekRange').textContent =
+      formatDateShort(monday) + ' — ' + formatDateShort(sunday);
+
+    $('#comebackScore').textContent = stats.comebackScore;
+    $('#reportTasks').textContent = stats.taskPercent + '%';
+    $('#reportEnergy').textContent = stats.avgEnergy;
+    $('#reportStreak').textContent = stats.streak;
+    $('#reportDays').textContent = stats.entryCount + '/7';
+    $('#reportProgressPercent').textContent = stats.taskPercent + '%';
+
+    setTimeout(() => {
+      $('#reportProgressFill').style.width = stats.taskPercent + '%';
+    }, 200);
+
+    // Wins list
+    const winsList = $('#winsList');
+    if (stats.wins.length > 0) {
+      winsList.innerHTML = stats.wins.map(w =>
+        `<li><span>${w.text}</span></li>`
+      ).join('');
+    } else {
+      winsList.innerHTML = '<li>No wins logged yet — keep pushing!</li>';
+    }
+
+    // "YOU'RE BACK." message
+    const yb = $('#youreBack');
+    if (stats.comebackScore > 80) {
+      setTimeout(() => yb.classList.add('visible'), 600);
+    } else {
+      yb.classList.remove('visible');
+    }
+  }
+
+  // ── Past Weeks Archive ──────────────────────────
+  $('#archiveToggle').addEventListener('click', function() {
+    this.classList.toggle('open');
+    $('#archiveList').classList.toggle('open');
+  });
+
+  function updateArchive() {
+    const data = loadData();
+    const keys = Object.keys(data).sort();
+    if (keys.length === 0) {
+      $('#archiveList').innerHTML =
+        '<p style="color:var(--text-muted);padding:16px 0;font-size:14px;">No past weeks yet.</p>';
+      return;
+    }
+
+    // Group by week (Monday date)
+    const weeks = {};
+    keys.forEach(function(k) {
+      const d = parseDate(k);
+      const wk = weekKey(d);
+      if (!weeks[wk]) weeks[wk] = [];
+      weeks[wk].push({ date: k, ...data[k] });
+    });
+
+    // Current week key
+    const currentWk = weekKey(new Date());
+
+    // Build archive HTML (skip current week)
+    const weekKeys = Object.keys(weeks).sort().reverse();
+    let html = '';
+
+    weekKeys.forEach(function(wk) {
+      const mon = parseDate(wk);
+      const sun = getSunday(mon);
+      const entries = weeks[wk];
+      const stats = calcWeekStats(entries);
+      const isCurrent = wk === currentWk;
+
+      html += `
+        <div class="archive-week-item" data-week="${wk}" ${isCurrent ? 'style="border-left: 3px solid var(--gold);"' : ''}>
+          <div>
+            <div class="archive-week-label">
+              ${isCurrent ? '⬤ ' : ''}${formatDateShort(mon)} — ${formatDateShort(sun)}
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+              ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}
+            </div>
+          </div>
+          <div class="archive-week-score">${stats.comebackScore}</div>
+        </div>
+      `;
+    });
+
+    $('#archiveList').innerHTML = html;
+
+    // Click handlers
+    $$('.archive-week-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        const wk = this.dataset.week;
+        showArchiveDetail(wk);
+      });
+    });
+  }
+
+  function showArchiveDetail(wk) {
+    const mon = parseDate(wk);
+    const sun = getSunday(mon);
+    const data = loadData();
+
+    // Get entries for this week
+    const entries = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
+      const key = dateKey(d);
+      entries.push({
+        date: key,
+        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        entry: data[key] || null
+      });
+    }
+
+    const stats = calcWeekStats(entries.filter(e => e.entry).map(e => ({ date: e.date, ...e.entry })));
+
+    let html = `
+      <h3 style="font-size:32px;margin-bottom:4px;">Week Review</h3>
+      <p style="font-size:12px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:24px;">
+        ${formatDateShort(mon)} — ${formatDateShort(sun)}
+      </p>
+
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-muted);font-weight:600;">Comeback Score</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--gold);line-height:1;text-shadow:0 0 40px var(--gold-glow);">
+          ${stats.comebackScore}
+        </div>
+        ${stats.comebackScore > 80 ? '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:28px;color:var(--gold);margin-top:8px;letter-spacing:0.1em;">YOU\'RE BACK.</div>' : ''}
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;">
+        <div class="stat-box"><div class="stat-number">${stats.taskPercent}%</div><div class="stat-label">Tasks Done</div></div>
+        <div class="stat-box"><div class="stat-number">${stats.avgEnergy}</div><div class="stat-label">Avg Energy</div></div>
+      </div>
+    `;
+
+    // Day-by-day breakdown
+    html += '<div style="margin-top:20px;">';
+    entries.forEach(function(item) {
+      const e = item.entry;
+      if (!e) {
+        html += `
+          <div style="padding:12px 0;border-bottom:1px solid var(--border);opacity:0.4;">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.05em;">${item.dayName}</span>
+            <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">— No entry</span>
+          </div>
+        `;
+        return;
+      }
+
+      const tasksDone = e.tasks ? e.tasks.filter(t => t.done).length : 0;
+      const tasksTotal = e.tasks ? e.tasks.length : 0;
+
+      html += `
+        <div style="padding:14px 0;border-bottom:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.05em;">${item.dayName}</span>
+            <span style="font-size:13px;color:var(--gold);">${tasksDone}/${tasksTotal} tasks · ⚡${e.energy || '—'}</span>
+          </div>
+          ${e.goal ? `<div style="font-size:13px;color:var(--text-dim);margin-bottom:4px;">Goal: ${escapeHtml(e.goal)}</div>` : ''}
+          ${e.win ? `<div style="font-size:13px;color:var(--gold);opacity:0.8;">★ ${escapeHtml(e.win)}</div>` : ''}
+        </div>
+      `;
+    });
+    html += '</div>';
+
+    // Wins
+    if (stats.wins.length > 0) {
+      html += `
+        <div style="margin-top:24px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);font-weight:600;margin-bottom:12px;">Wins of the Week</div>
+          <ul class="wins-list">
+            ${stats.wins.map(w => `<li>${escapeHtml(w.text)}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    $('#archiveDetailContent').innerHTML = html;
+    $('#archiveOverlay').classList.add('open');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Close archive overlay
+  $('#archiveClose').addEventListener('click', function() {
+    $('#archiveOverlay').classList.remove('open');
+  });
+
+  $('#archiveOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('open');
+    }
+  });
+
+  // ── Toast ───────────────────────────────────────
+  function showToast(msg) {
+    const toast = $('#toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // ── Init ────────────────────────────────────────
+  function init() {
+    updateHero();
+    loadEntryForDate(viewingDate);
+    updateWeekGlance();
+    updateArchive();
+  }
+
+  // Keyboard shortcut: Ctrl+S to save
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      $('#saveEntry').click();
+    }
+  });
+
+  init();
+
+})();
+</script>
+</body>
+</html>
